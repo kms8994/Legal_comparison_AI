@@ -53,7 +53,7 @@ DATABASE_URL=postgresql+psycopg://...
 LAW_OPEN_API_OC=...
 ```
 
-## 5. 서버 실행
+## 5. 백엔드 서버 실행
 
 ```bash
 docker compose -f deployment/gce/docker-compose.yml up -d --build
@@ -65,22 +65,43 @@ docker compose -f deployment/gce/docker-compose.yml up -d --build
 curl http://YOUR_STATIC_IP/api/health
 ```
 
-브라우저:
+브라우저에서 루트로 접속하면 백엔드 실행 확인 문구만 표시된다.
 
 ```text
 http://YOUR_STATIC_IP
 ```
 
-## 6. 판례 수집 실행
+프론트엔드는 Vercel에서 별도로 배포한다.
+
+## 6. Vercel 프론트 설정
+
+Vercel 프로젝트는 `frontend` 디렉터리를 root로 설정한다.
+
+Environment Variables:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://YOUR_STATIC_IP
+```
+
+백엔드 `backend/.env`의 CORS에는 Vercel 도메인을 추가한다.
+
+```env
+CORS_ORIGINS=["http://YOUR_STATIC_IP","https://YOUR_VERCEL_DOMAIN.vercel.app"]
+```
+
+Vercel 배포 후 브라우저는 Vercel URL로 접속하고, API 요청은 GCE VM의 `/api`로 전달된다.
+
+## 7. 판례 수집 실행
 
 ```bash
 docker compose -f deployment/gce/docker-compose.yml exec backend \
   python -m pipelines.collector.collect_precedents --query 교통사고 --pages 1 --display 10
 ```
 
-## 7. 운영 메모
+## 8. 운영 메모
 
 - `backend/.env`는 서버에만 둔다.
 - 국가법령정보 API에는 VM의 static IP를 등록한다.
-- HTTPS가 필요해지면 nginx에 도메인과 인증서를 붙인다.
+- 백엔드 HTTPS가 필요해지면 nginx에 도메인과 인증서를 붙인다.
+- 프론트 정적/SSR 배포는 Vercel이 담당한다.
 - 첫 수집은 `--display 5` 정도로 작게 시작해서 필드 매핑을 검수한다.

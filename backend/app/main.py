@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.compare import router as compare_router
+from app.api.db_health import router as db_health_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -25,3 +26,4 @@ def health_check() -> dict[str, str]:
 
 
 app.include_router(compare_router, prefix="/api")
+app.include_router(db_health_router, prefix="/api")

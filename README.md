@@ -38,6 +38,28 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 curl http://127.0.0.1:8000/api/health
 ```
 
+## Supabase 연결
+
+1. Supabase SQL Editor에서 스키마를 실행합니다.
+
+   ```text
+   supabase/schema.sql
+   ```
+
+2. `backend/.env.example`을 참고해 `backend/.env`를 만듭니다.
+
+   ```env
+   DATABASE_URL=postgresql+psycopg://...
+   ```
+
+3. DB 연결 확인:
+
+   ```bash
+   curl http://127.0.0.1:8000/api/db/health
+   ```
+
+프론트엔드에는 Supabase DB 접속 정보를 넣지 않습니다. DB 연결은 FastAPI 백엔드에서만 수행합니다.
+
 ## 다음 개발 단계
 
 1. Supabase DB 스키마 작성

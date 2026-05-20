@@ -181,7 +181,7 @@ function toComparisonData(response: CompareApiResponse): ComparisonData {
 export default function Home() {
   const [inputMode, setInputMode] = useState<InputMode>("natural_language");
   const [description, setDescription] = useState("");
-  const [comparison, setComparison] = useState<ComparisonData | null>(defaultComparison);
+  const [comparison, setComparison] = useState<ComparisonData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 

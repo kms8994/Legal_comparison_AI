@@ -127,12 +127,30 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.input-mode-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
 .start-search label {
   display: block;
   margin-bottom: 10px;
   color: #344054;
   font-size: 14px;
   font-weight: 900;
+}
+
+.start-search select {
+  width: min(220px, 100%);
+  min-height: 42px;
+  padding: 0 12px;
+  color: #182230;
+  background: #fff;
+  border: 1px solid #cfd6e2;
+  border-radius: 10px;
+  outline: none;
+  font-weight: 800;
 }
 
 .start-search textarea {
@@ -148,7 +166,20 @@ h1 {
   line-height: 1.7;
 }
 
-.start-search textarea:focus {
+.start-search input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 16px;
+  color: #182230;
+  background: #fff;
+  border: 1px solid #cfd6e2;
+  border-radius: 12px;
+  outline: none;
+}
+
+.start-search textarea:focus,
+.start-search input:focus,
+.start-search select:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.12);
 }

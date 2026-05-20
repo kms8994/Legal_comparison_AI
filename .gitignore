@@ -8,5 +8,7 @@ __pycache__/
 venv/
 .env
 .env.local
+backend/.env
+frontend/.env.local
 dist/
 build/

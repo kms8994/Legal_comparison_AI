@@ -7,7 +7,7 @@ from app.core.config import settings
 
 app = FastAPI(
     title="판례비교 API",
-    description="자연어 사건 설명을 기반으로 기준 판례와 반대 결론 판례를 비교합니다.",
+    description="자연어 사건 설명을 기반으로 기준 판례와 다른 결론의 판례를 비교합니다.",
     version="0.1.0",
 )
 

@@ -1,8 +1,14 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
 class CompareRequest(BaseModel):
-    description: str = Field(..., min_length=5, description="사용자가 입력한 자연어 사건 설명")
+    description: str = Field(..., min_length=2, description="사용자가 입력한 사건번호 또는 자연어 사건 설명")
+    query_type: Literal["case_number", "natural_language"] = Field(
+        default="natural_language",
+        description="사용자 입력 방식",
+    )
 
 
 class PrecedentSummary(BaseModel):

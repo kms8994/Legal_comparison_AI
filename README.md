@@ -67,3 +67,21 @@ curl http://127.0.0.1:8000/api/health
 3. LLM 전처리 파이프라인 연결
 4. 임베딩 기반 후보 검색 구현
 5. 현재 목업 `/api/compare`를 실제 검색 결과로 교체
+
+## 판례 수집 파이프라인
+
+`backend/.env`에 국가법령정보 API OC 값을 추가합니다.
+
+```env
+LAW_OPEN_API_OC=...
+```
+
+실행 예시:
+
+```bash
+cd backend
+.venv\Scripts\activate
+python -m pipelines.collector.collect_precedents --query 교통사고 --pages 1 --display 10
+```
+
+현재 파이프라인은 국가법령정보 API에서 판례 목록과 본문을 가져와 원문 테이블과 구조화 테이블에 저장합니다. LLM 요약과 임베딩 생성은 다음 단계에서 연결합니다.

@@ -15,6 +15,10 @@ from app.schemas.compare import (
     PrecedentSummary,
 )
 
+MIN_REFERENCE_SCORE = 2
+MIN_OPPOSITE_SCORE = 2
+MIN_SEARCHABLE_PRECEDENTS = 2
+
 
 @dataclass(frozen=True)
 class SearchablePrecedent:
@@ -33,8 +37,8 @@ class SearchablePrecedent:
 
 def build_db_comparison(db: Session, payload: CompareRequest) -> CompareResponse:
     precedents = _load_searchable_precedents(db)
-    if not precedents:
-        raise ValueError("검색 가능한 판례 데이터가 없습니다.")
+    if len(precedents) < MIN_SEARCHABLE_PRECEDENTS:
+        raise ValueError("검색 가능한 판례 데이터가 충분하지 않습니다.")
 
     reference_case = _select_reference_case(
         precedents,
@@ -121,13 +125,14 @@ def _select_reference_case(
     if query_type == "case_number":
         raise ValueError("사건번호에 해당하는 판례를 찾지 못했습니다.")
 
-    return max(
-        precedents,
-        key=lambda precedent: (
-            _text_score(description, precedent),
-            precedent.decision_date,
-        ),
-    )
+    scored = [
+        (_text_score(description, precedent), precedent)
+        for precedent in precedents
+    ]
+    best_score, best_precedent = max(scored, key=lambda item: (item[0], item[1].decision_date))
+    if best_score < MIN_REFERENCE_SCORE:
+        raise ValueError("입력한 사건과 관련 있는 판례 데이터가 아직 충분하지 않습니다.")
+    return best_precedent
 
 
 def _find_case_number(
@@ -152,10 +157,14 @@ def _select_opposite_case(
     if not opposite_candidates:
         raise ValueError("유사하지만 결론이 다른 판례를 찾지 못했습니다.")
 
-    return max(
-        opposite_candidates,
-        key=lambda precedent: _similarity_score(reference_case, precedent),
-    )
+    scored = [
+        (_similarity_score(reference_case, precedent), precedent)
+        for precedent in opposite_candidates
+    ]
+    best_score, best_precedent = max(scored, key=lambda item: item[0])
+    if best_score < MIN_OPPOSITE_SCORE:
+        raise ValueError("유사하지만 결론이 다른 판례 데이터가 아직 충분하지 않습니다.")
+    return best_precedent
 
 
 def _select_other_candidates(

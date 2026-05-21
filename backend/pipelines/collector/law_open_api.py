@@ -4,11 +4,11 @@ import json
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlencode
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
-LIST_URL = "https://www.law.go.kr/DRF/lawSearch.do"
-DETAIL_URL = "https://www.law.go.kr/DRF/lawService.do"
+LIST_URL = "http://www.law.go.kr/DRF/lawSearch.do"
+DETAIL_URL = "http://www.law.go.kr/DRF/lawService.do"
 
 
 @dataclass(frozen=True)
@@ -73,11 +73,23 @@ class LawOpenApiClient:
 
     def _get_json(self, url: str, params: dict[str, object]) -> dict[str, Any]:
         request_url = f"{url}?{urlencode(params)}"
-        with urlopen(request_url, timeout=self.timeout_seconds) as response:
+        request = Request(
+            request_url,
+            headers={
+                "Accept": "application/json,text/plain,*/*",
+                "User-Agent": "LegalComparisonAI/0.1 (+https://github.com/kms8994/Legal_comparison_AI)",
+            },
+        )
+        with urlopen(request, timeout=self.timeout_seconds) as response:
             body = response.read().decode("utf-8")
         parsed = json.loads(body)
         if not isinstance(parsed, dict):
             raise ValueError("국가법령정보 API 응답 형식이 올바르지 않습니다.")
+        if parsed.get("result") and not (
+            _dig(parsed, "PrecSearch", "prec") or _dig(parsed, "prec")
+        ):
+            message = parsed.get("msg") or parsed.get("message") or parsed.get("result")
+            raise RuntimeError(f"국가법령정보 API 오류: {message}")
         return parsed
 
 

@@ -35,6 +35,7 @@ type ComparisonData = {
 };
 
 type CompareApiResponse = {
+  status?: "ready";
   query: string;
   reference_case: {
     case_number: string;
@@ -63,6 +64,30 @@ type CompareApiResponse = {
   }[];
   disclaimer: string;
 };
+
+type ClarificationApiResponse = {
+  status: "needs_clarification";
+  query: string;
+  extracted_facts: Record<string, unknown>;
+  questions: {
+    slot: string;
+    label: string;
+    question: string;
+    reason: string;
+    example: string;
+  }[];
+  guidance: string;
+};
+
+type InsufficientDataApiResponse = {
+  status: "insufficient_data";
+  query: string;
+  reason: string;
+  extracted_facts?: Record<string, unknown> | null;
+  suggestions: string[];
+};
+
+type ApiResponse = CompareApiResponse | ClarificationApiResponse | InsufficientDataApiResponse;
 
 const defaultQuery =
   "신호등 없는 교차로에서 좌회전 차량과 직진 차량이 충돌한 교통사고";
@@ -182,6 +207,8 @@ export default function Home() {
   const [inputMode, setInputMode] = useState<InputMode>("natural_language");
   const [description, setDescription] = useState("");
   const [comparison, setComparison] = useState<ComparisonData | null>(null);
+  const [clarification, setClarification] = useState<ClarificationApiResponse | null>(null);
+  const [insufficientData, setInsufficientData] = useState<InsufficientDataApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -219,7 +246,21 @@ export default function Home() {
         throw new Error("compare request failed");
       }
 
-      const data = (await response.json()) as CompareApiResponse;
+      const data = (await response.json()) as ApiResponse;
+      if (data.status === "needs_clarification") {
+        setClarification(data);
+        setInsufficientData(null);
+        setComparison(null);
+        return;
+      }
+      if (data.status === "insufficient_data") {
+        setInsufficientData(data);
+        setClarification(null);
+        setComparison(null);
+        return;
+      }
+      setClarification(null);
+      setInsufficientData(null);
       setComparison(toComparisonData(data));
     } catch {
       setComparison({ ...defaultComparison, query });
@@ -242,6 +283,8 @@ export default function Home() {
 
   function resetSearch() {
     setComparison(null);
+    setClarification(null);
+    setInsufficientData(null);
     setNotice(null);
     setDescription("");
     setInputMode("natural_language");
@@ -305,6 +348,31 @@ export default function Home() {
               />
             )}
             {notice ? <p className="notice">{notice}</p> : null}
+            {clarification ? (
+              <section className="clarification-box" aria-label="추가 입력 요청">
+                <p>{clarification.guidance}</p>
+                <div className="clarification-list">
+                  {clarification.questions.map((item) => (
+                    <article key={item.slot}>
+                      <strong>{item.label}</strong>
+                      <p>{item.question}</p>
+                      <span>{item.example}</span>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+            {insufficientData ? (
+              <section className="data-empty-box" aria-label="데이터 부족 안내">
+                <strong>관련 판례 데이터가 아직 부족합니다.</strong>
+                <p>{insufficientData.reason}</p>
+                <ul>
+                  {insufficientData.suggestions.map((suggestion) => (
+                    <li key={suggestion}>{suggestion}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
             <div className="start-actions">
               <button type="button" onClick={() => void runCompare()} disabled={isLoading}>
                 {isLoading ? "판례 찾는 중" : "판례 비교하기"}

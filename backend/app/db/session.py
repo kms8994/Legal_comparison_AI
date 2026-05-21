@@ -12,6 +12,7 @@ def _build_engine():
 
     return create_engine(
         settings.database_url,
+        connect_args={"prepare_threshold": None},
         pool_pre_ping=True,
         pool_size=5,
         max_overflow=5,

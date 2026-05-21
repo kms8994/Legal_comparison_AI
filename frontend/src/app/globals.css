@@ -220,6 +220,83 @@ h1 {
   font-weight: 800;
 }
 
+.clarification-box {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d9e2ef;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.clarification-box > p {
+  margin: 0;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.clarification-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.clarification-list article {
+  padding: 12px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.clarification-list strong {
+  display: block;
+  color: #101828;
+  font-size: 13px;
+}
+
+.clarification-list p {
+  margin: 6px 0;
+  color: #344054;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.clarification-list span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.data-empty-box {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #fecdca;
+  border-radius: 12px;
+  background: #fff7f5;
+}
+
+.data-empty-box strong {
+  display: block;
+  color: #b42318;
+  font-size: 14px;
+}
+
+.data-empty-box p {
+  margin: 8px 0 0;
+  color: #344054;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.data-empty-box ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #475467;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
 .start-example {
   margin: 14px 0 0;
   color: var(--muted);

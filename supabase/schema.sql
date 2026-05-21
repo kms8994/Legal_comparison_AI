@@ -26,13 +26,19 @@ create table if not exists precedent_structures (
     precedent_id uuid not null references precedents(id) on delete cascade,
     issue_summary text,
     fact_summary text,
+    legal_question text,
     holding_label text,
+    holding_summary text,
+    reasoning_summary text,
+    key_facts jsonb not null default '[]'::jsonb,
+    distinguishing_facts jsonb not null default '[]'::jsonb,
     referenced_statutes jsonb not null default '[]'::jsonb,
     referenced_precedents jsonb not null default '[]'::jsonb,
     llm_model text,
     prompt_version text,
     confidence_score numeric(4, 3),
     review_status text not null default 'unreviewed',
+    llm_raw_output jsonb,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     constraint uq_precedent_structures_precedent unique (precedent_id),
@@ -91,6 +97,38 @@ create table if not exists processing_jobs (
 
 create index if not exists idx_processing_jobs_status on processing_jobs (status);
 create index if not exists idx_processing_jobs_type on processing_jobs (job_type);
+
+create table if not exists collection_requests (
+    id uuid primary key default gen_random_uuid(),
+    query_text text not null,
+    normalized_query text not null unique,
+    domain text,
+    case_type text,
+    legal_issue text,
+    fact_pattern text,
+    key_facts jsonb not null default '[]'::jsonb,
+    requested_count integer not null default 1,
+    priority integer not null default 0,
+    status text not null default 'pending',
+    source text not null default 'user_search',
+    last_requested_at timestamptz not null default now(),
+    processed_at timestamptz,
+    error_message text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    constraint chk_collection_requests_status check (
+        status in ('pending', 'collecting', 'structured', 'done', 'failed', 'dismissed')
+    ),
+    constraint chk_collection_requests_source check (
+        source in ('user_search', 'seed', 'admin')
+    )
+);
+
+create index if not exists idx_collection_requests_status
+    on collection_requests (status);
+
+create index if not exists idx_collection_requests_priority
+    on collection_requests (priority desc, requested_count desc, last_requested_at desc);
 
 create table if not exists comparison_feedback (
     id uuid primary key default gen_random_uuid(),

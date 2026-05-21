@@ -35,10 +35,38 @@ class CandidateSummary(BaseModel):
     reason: str
 
 
+class ClarificationQuestion(BaseModel):
+    slot: str
+    label: str
+    question: str
+    reason: str
+    example: str
+
+
+class ClarificationResponse(BaseModel):
+    status: Literal["needs_clarification"] = "needs_clarification"
+    query: str
+    extracted_facts: dict[str, object]
+    questions: list[ClarificationQuestion]
+    guidance: str
+
+
+class InsufficientDataResponse(BaseModel):
+    status: Literal["insufficient_data"] = "insufficient_data"
+    query: str
+    reason: str
+    extracted_facts: dict[str, object] | None = None
+    suggestions: list[str]
+
+
 class CompareResponse(BaseModel):
+    status: Literal["ready"] = "ready"
     query: str
     reference_case: PrecedentSummary
     opposite_case: PrecedentSummary
     analysis: CompareAnalysis
     other_candidates: list[CandidateSummary]
     disclaimer: str
+
+
+CompareApiResponse = CompareResponse | ClarificationResponse | InsufficientDataResponse
